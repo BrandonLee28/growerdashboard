@@ -17,12 +17,12 @@ const CaliforniaChart = () => {
   const router = useRouter();
   const [geojsonData, setGeojsonData] = useState(null);
   const [hoverInfo, setHoverInfo] = useState(null);
-  const [data, setData] = useState("./to_zipcode_estab.csv");
+  const [data, setData] = useState("../to_zipcode_estab.csv");
   const toggleData = () => {
-    if (data === "./to_zipcode_estab.csv") {
-      setData("./outage.csv");
+    if (data === "../to_zipcode_estab.csv") {
+      setData("../outage.csv");
     } else {
-      setData("./to_zipcode_estab.csv");
+      setData("../to_zipcode_estab.csv");
     }
   };
 
@@ -190,7 +190,7 @@ const CaliforniaChart = () => {
             cursor: "pointer",
           }}
         >
-          {data === "./to_zipcode_estab.csv" ? "ESTAB" : "Outage"}
+          {data === "../to_zipcode_estab.csv" ? "ESTAB" : "Outage"}
         </button>
       </div>
     </div>
