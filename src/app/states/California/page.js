@@ -86,7 +86,7 @@ const CaliforniaChart = () => {
           zoom: 6,
         }}
         style={{ width: "100%", height: "100%" }}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle="../basestyle.json"
         minZoom={6}
         maxZoom={10}
         dragPan={true}
