@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Map, Layer, Source } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const geoJsonUrl = "../us-states.json";
+const geoJsonUrl = "./us-states.json";
 
 const MapChart = () => {
   const [selectedState, setSelectedState] = useState(null);
