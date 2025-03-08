@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { Map, Layer, Source, Popup } from "react-map-gl/maplibre";
@@ -14,7 +14,9 @@ const getColor = (value, min, max) => {
 };
 
 const CaliforniaChart = () => {
+  const mapRef = useRef();
   const router = useRouter();
+  const [selectedZip, setSelectedZip] = useState(null);
   const [geojsonData, setGeojsonData] = useState(null);
   const [hoverInfo, setHoverInfo] = useState(null);
   const [data, setData] = useState("../to_zipcode_estab.csv");
@@ -62,6 +64,39 @@ const CaliforniaChart = () => {
     fetchData();
   }, [data]);
 
+  useEffect(() => {
+    if (selectedZip && geojsonData) {
+      const feature = geojsonData.features.find(
+        (f) => f.properties.ZCTA5CE10 === selectedZip,
+      );
+
+      if (feature) {
+        const coordinates = feature.geometry.coordinates;
+        let center;
+
+        if (feature.geometry.type === "Polygon") {
+          center = coordinates[0][0]; // First point of the first ring
+        } else if (feature.geometry.type === "MultiPolygon") {
+          // Find the centroid of the largest polygon
+          const largestPolygon = coordinates.reduce(
+            (largest, current) =>
+              current[0].length > largest[0].length ? current : largest,
+            coordinates[0],
+          );
+          center = largestPolygon[0][0]; // First point of the largest polygon
+        }
+
+        if (Array.isArray(center) && center.length === 2) {
+          mapRef.current?.flyTo({
+            center: center,
+            zoom: 11,
+            essential: true,
+          });
+        }
+      }
+    }
+  }, [selectedZip]);
+
   const californiaBounds = [
     [-124.482003, 32.528832],
     [-113.499592, 42.009518],
@@ -78,6 +113,7 @@ const CaliforniaChart = () => {
       }}
     >
       <Map
+        ref={mapRef}
         initialViewState={{
           longitude: -119.4179,
           latitude: 36.7783,
@@ -114,7 +150,12 @@ const CaliforniaChart = () => {
               id="zipcode-layer"
               type="fill"
               paint={{
-                "fill-color": ["get", "color"],
+                "fill-color": [
+                  "case",
+                  ["==", ["get", "ZCTA5CE10"], selectedZip],
+                  "#FB923C", // Highlight selected ZIP in red
+                  ["get", "color"], // Default color
+                ],
                 "fill-opacity": 0.7,
               }}
             />
@@ -145,6 +186,49 @@ const CaliforniaChart = () => {
       </Map>
 
       <div
+        className="overflow-scroll border-2 bg-white rounded-[10px] z-10 fixed"
+        style={{
+          padding: "10px",
+          height: "800px", // Fixed height in pixels
+          width: "500px", // Fixed width in pixels
+          opacity: "0.8",
+          top: "15%", // Adjust this if needed
+          right: "20px", // Always 10px from the right
+        }}
+      >
+        <div
+          className="text-white bg-orange-400 text-center rounded-xl text-xl"
+          style={{
+            padding: "10px 20px",
+          }}
+        >
+          ESTAB
+        </div>
+        <div className="flex justify-between text-center p-2 text-blue-500 border-b">
+          <span className="font-bold pl-5">ZipCode</span>
+          <span className="font-bold pr-5">ESTAB</span>
+        </div>
+        {geojsonData &&
+          geojsonData.features
+            .slice()
+            .sort((a, b) => b.properties.estab - a.properties.estab)
+            .map((feature) => (
+              <div
+                key={feature.properties.ZCTA5CE10}
+                className={`flex text-blue-500 justify-between p-2 border-b cursor-pointer text-center ${
+                  selectedZip === feature.properties.ZCTA5CE10
+                    ? "bg-orange-400"
+                    : ""
+                }`}
+                onClick={() => setSelectedZip(feature.properties.ZCTA5CE10)}
+              >
+                <span className="pl-5">{feature.properties.ZCTA5CE10}</span>
+                <span className="pr-5">{feature.properties.estab}</span>
+              </div>
+            ))}
+      </div>
+
+      <div
         style={{
           position: "absolute",
           top: "20px",
@@ -155,14 +239,15 @@ const CaliforniaChart = () => {
           padding: "10px",
           borderRadius: "10px",
           boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+          opacity: "0.8",
         }}
       >
         <button
           onClick={() => {
             router.push("/");
           }}
+          className="bg-blue-500"
           style={{
-            backgroundColor: "#007AFF",
             color: "white",
             border: "none",
             padding: "10px 20px",
