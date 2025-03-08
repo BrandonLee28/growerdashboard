@@ -28,9 +28,7 @@ const CaliforniaChart = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const geojsonResponse = await fetch(
-        "https://raw.githubusercontent.com/OpenDataDE/State-zip-code-GeoJSON/refs/heads/master/ca_california_zip_codes_geo.min.json",
-      );
+      const geojsonResponse = await fetch("../calizipcode.json");
       const geojson = await geojsonResponse.json();
 
       const csvResponse = await fetch(data);
