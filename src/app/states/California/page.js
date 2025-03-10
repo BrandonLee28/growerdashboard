@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { Map, Layer, Source, Popup } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import TopBar from "@/app/components/TopBar";
+import ESTABPanel from "@/app/components/ESTABPanel";
 
 const getColor = (value, min, max) => {
   const ratio = (value - min) / (max - min);
@@ -185,97 +187,14 @@ const CaliforniaChart = () => {
         )}
       </Map>
 
-      <div
-        className="overflow-scroll border-2 bg-white rounded-[10px] z-10 fixed"
-        style={{
-          padding: "10px",
-          height: "800px", // Fixed height in pixels
-          width: "500px", // Fixed width in pixels
-          opacity: "0.8",
-          top: "15%", // Adjust this if needed
-          right: "20px", // Always 10px from the right
-        }}
-      >
-        <div
-          className="text-white bg-orange-400 text-center rounded-xl text-xl"
-          style={{
-            padding: "10px 20px",
-          }}
-        >
-          ESTAB
-        </div>
-        <div className="flex justify-between text-center p-2 text-blue-500 border-b">
-          <span className="font-bold pl-5">ZipCode</span>
-          <span className="font-bold pr-5">ESTAB</span>
-        </div>
-        {geojsonData &&
-          geojsonData.features
-            .slice()
-            .sort((a, b) => b.properties.estab - a.properties.estab)
-            .map((feature) => (
-              <div
-                key={feature.properties.ZCTA5CE10}
-                className={`flex text-blue-500 justify-between p-2 border-b cursor-pointer text-center ${
-                  selectedZip === feature.properties.ZCTA5CE10
-                    ? "bg-orange-400"
-                    : ""
-                }`}
-                onClick={() => setSelectedZip(feature.properties.ZCTA5CE10)}
-              >
-                <span className="pl-5">{feature.properties.ZCTA5CE10}</span>
-                <span className="pr-5">{feature.properties.estab}</span>
-              </div>
-            ))}
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "50%",
-          transform: "translate(-50%, 0)",
-          zIndex: 10,
-          backgroundColor: "white",
-          padding: "10px",
-          borderRadius: "10px",
-          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-          opacity: "0.8",
-        }}
-      >
-        <button
-          onClick={() => {
-            router.push("/");
-          }}
-          className="bg-blue-500"
-          style={{
-            color: "white",
-            border: "none",
-            padding: "10px 20px",
-            fontSize: "16px",
-            borderRadius: "10px",
-            cursor: "pointer",
-          }}
-        >
-          Go Back
-        </button>
-
-        <button
-          className="ml-2 bg-orange-400"
-          onClick={() => {
-            toggleData();
-          }}
-          style={{
-            color: "white",
-            border: "none",
-            padding: "10px 20px",
-            fontSize: "16px",
-            borderRadius: "10px",
-            cursor: "pointer",
-          }}
-        >
-          {data === "../to_zipcode_estab.csv" ? "ESTAB" : "Outage"}
-        </button>
-      </div>
+      {data == "../to_zipcode_estab.csv" && (
+        <ESTABPanel
+          geojsonData={geojsonData}
+          selectedZip={selectedZip}
+          setSelectedZip={setSelectedZip}
+        />
+      )}
+      <TopBar router={router} data={data} toggleData={toggleData} />
     </div>
   );
 };

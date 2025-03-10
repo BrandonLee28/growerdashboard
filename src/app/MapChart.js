@@ -68,22 +68,10 @@ const MapChart = () => {
           />
         </Source>
       </Map>
-      <div
-        style={{
-          position: "absolute",
-          top: "15px",
-          left: "50%",
-          transform: "translate(-50%, 0)",
-          zIndex: 10,
-          backgroundColor: "white",
-          padding: "10px",
-          borderRadius: "15px",
-          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-        }}
-      >
-        <h1 className="font-extrabold p-[5px] text-blue-400 text-xl">
-          Select a State for Outage Data
-        </h1>
+      <div className="text-blue-400 w-[150px] text-center  topbar flex justify-center items-center">
+        <div className="w-full">
+          <h1 className="text-center font-bold">Select a State</h1>
+        </div>
       </div>
     </div>
   );
