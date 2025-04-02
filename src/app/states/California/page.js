@@ -33,7 +33,7 @@ const CaliforniaChart = (props) => {
     ],
     dataTypes = [
       {
-        key: `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_${regionType}_estab_cleaned.csv`,
+        key: `../california_data/california_county_estab_cleaned.csv`,
         label: "ESTAB",
         valueColumn: "Total ESTAB",
         description: "Establishments count by region",
@@ -43,7 +43,7 @@ const CaliforniaChart = (props) => {
         unit: "buildings",
       },
       {
-        key: `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_${regionType}_saidi_cleaned.csv`,
+        key: `../california_data/california_county_saidi_cleaned.csv`,
         label: "SAIDI",
         valueColumn: "SAIDI",
         description: "System Average Interruption Duration Index (minutes)",
@@ -53,7 +53,7 @@ const CaliforniaChart = (props) => {
         unit: "mins",
       },
       {
-        key: `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_${regionType}_saifi_cleaned.csv`,
+        key: `../california_data/california_county_saifi_cleaned.csv`,
         label: "SAIFI",
         valueColumn: "SAIFI",
         description:
@@ -64,7 +64,7 @@ const CaliforniaChart = (props) => {
         unit: "freq",
       },
     ],
-    geojsonPath = `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_counties.geojson`,
+    geojsonPath = `../california_data/california_counties.geojson`,
   } = props;
 
   const [hoveredCounty, setHoveredCounty] = useState(null);
