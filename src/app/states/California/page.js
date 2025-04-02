@@ -19,7 +19,6 @@ const getColor = (value, min, max) => {
 const CaliforniaChart = (props) => {
   const {
     stateName = "California",
-    stateAbbreviation = "CA",
     regionType = "county",
     regionIdProperty = "NAME",
     initialViewCoordinates = {
@@ -71,6 +70,8 @@ const CaliforniaChart = (props) => {
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
 
   const mapRef = useRef();
+  const [processedGeojsonData, setProcessedGeojsonData] = useState(null);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [geojsonData, setGeojsonData] = useState(null);
   const [hoverInfo, setHoverInfo] = useState(null);
@@ -81,15 +82,30 @@ const CaliforniaChart = (props) => {
     return dataTypes.find((dt) => dt.key === currentDataType) || dataTypes[0];
   };
 
-  const toggleData = (newDataType) => {
-    setCurrentDataType(newDataType);
-  };
+  useEffect(() => {
+    const fetchGeoJSON = async () => {
+      try {
+        const response = await fetch(geojsonPath);
+        if (!response.ok) throw new Error("Failed to fetch GeoJSON");
+        const geojson = await response.json();
+        setGeojsonData(geojson);
+      } catch (error) {
+        console.error("Error fetching GeoJSON:", error);
+      }
+    };
+
+    fetchGeoJSON();
+  }, [geojsonPath]);
 
   useEffect(() => {
-    const fetchCSVData = async (dataType) => {
+    const fetchCSVData = async () => {
+      setIsDataLoading(true);
+
       try {
-        const response = await fetch(dataType);
+        const response = await fetch(currentDataType);
+        if (!response.ok) throw new Error("Failed to fetch CSV");
         const csvText = await response.text();
+
         Papa.parse(csvText, {
           header: true,
           complete: (results) => {
@@ -104,26 +120,31 @@ const CaliforniaChart = (props) => {
             }, {});
 
             setCsvData(dataMap);
+            setIsDataLoading(false);
+          },
+          error: (error) => {
+            console.error("Error parsing CSV:", error);
+            setIsDataLoading(false);
           },
         });
       } catch (error) {
-        console.error("error:", error);
+        console.error("Error fetching CSV:", error);
+        setIsDataLoading(false);
       }
     };
 
-    if (currentDataType && !csvData[currentDataType]) {
-      fetchCSVData(currentDataType);
-    }
+    fetchCSVData();
   }, [currentDataType]);
 
   useEffect(() => {
-    if (!geojsonData || Object.keys(csvData).length === 0) return;
+    if (!geojsonData || isDataLoading || Object.keys(csvData).length === 0)
+      return;
 
     const dataTypeConfig = getCurrentDataTypeConfig();
     const min = dataTypeConfig.minValue;
     const max = dataTypeConfig.maxValue;
 
-    setGeojsonData({
+    const updatedGeojson = {
       ...geojsonData,
       features: geojsonData.features.map((feature) => {
         const regionName = feature.properties[regionIdProperty];
@@ -132,27 +153,21 @@ const CaliforniaChart = (props) => {
           ...feature,
           properties: {
             ...feature.properties,
-            value: value,
+            value,
             color: getColor(value, min, max),
           },
         };
       }),
-    });
-  }, [csvData]); // Separate updating geojson from fetching CSV
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const geojsonResponse = await fetch(geojsonPath);
-        const geojson = await geojsonResponse.json();
-        setGeojsonData(geojson);
-      } catch (error) {
-        console.error("Error fetching GeoJSON:", error);
-      }
     };
 
-    fetchData();
-  }, [geojsonPath]);
+    setProcessedGeojsonData(updatedGeojson);
+  }, [geojsonData, csvData, isDataLoading]);
+
+  const toggleData = (newDataType) => {
+    if (newDataType !== currentDataType) {
+      setCurrentDataType(newDataType);
+    }
+  };
 
   const handleRegionSelect = (regionName) => {
     if (geojsonData) {
@@ -230,7 +245,7 @@ const CaliforniaChart = (props) => {
         touchZoomRotate={true}
         keyboard={true}
         maxBounds={stateBounds}
-        interactiveLayerIds={geojsonData ? ["region-layer"] : []}
+        interactiveLayerIds={processedGeojsonData ? ["region-layer"] : []}
         onMouseMove={(event) => {
           const feature = event.features?.[0];
           if (feature) {
@@ -258,8 +273,8 @@ const CaliforniaChart = (props) => {
           setHoveredCounty(null);
         }}
       >
-        {geojsonData && (
-          <Source id="regions" type="geojson" data={geojsonData}>
+        {processedGeojsonData && (
+          <Source id="regions" type="geojson" data={processedGeojsonData}>
             {/* Main fill layer with conditional styling */}
             <Layer
               id="region-layer"
