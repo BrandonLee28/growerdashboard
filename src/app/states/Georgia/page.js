@@ -3,7 +3,6 @@ import * as React from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { Map, Layer, Source, Popup } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -16,24 +15,23 @@ const getColor = (value, min, max) => {
   return `rgb(${r},${g},0)`;
 };
 
-const CaliforniaChart = (props) => {
+const GeorgiaChart = (props) => {
   const {
-    stateName = "California",
-    stateAbbreviation = "CA",
+    stateName = "Georgia",
     regionType = "county",
     regionIdProperty = "NAME",
     initialViewCoordinates = {
-      longitude: -119.4179,
-      latitude: 37.7783,
+      longitude: -83.4341,
+      latitude: 32.1656,
       zoom: 6,
     },
     stateBounds = [
-      [-124.482003, 32.528832],
-      [-113.499592, 42.009518],
+      [-85.6052, 30.3558], // Southwest corner
+      [-80.8397, 35.0007], // Northeast corner
     ],
     dataTypes = [
       {
-        key: `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_${regionType}_estab_cleaned.csv`,
+        key: `../georgia_data/georgia_county_estab_cleaned.csv`,
         label: "ESTAB",
         valueColumn: "Total ESTAB",
         description: "Establishments count by region",
@@ -43,7 +41,7 @@ const CaliforniaChart = (props) => {
         unit: "buildings",
       },
       {
-        key: `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_${regionType}_saidi_cleaned.csv`,
+        key: `../georgia_data/georgia_county_saidi_cleaned.csv`,
         label: "SAIDI",
         valueColumn: "SAIDI",
         description: "System Average Interruption Duration Index (minutes)",
@@ -53,7 +51,7 @@ const CaliforniaChart = (props) => {
         unit: "mins",
       },
       {
-        key: `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_${regionType}_saifi_cleaned.csv`,
+        key: `../georgia_data/georgia_county_saifi_cleaned.csv`,
         label: "SAIFI",
         valueColumn: "SAIFI",
         description:
@@ -64,7 +62,7 @@ const CaliforniaChart = (props) => {
         unit: "freq",
       },
     ],
-    geojsonPath = `../${stateName.toLowerCase()}_data/${stateName.toLowerCase()}_counties.geojson`,
+    geojsonPath = `../georgia_data/georgia_counties.geojson`,
   } = props;
 
   const [hoveredCounty, setHoveredCounty] = useState(null);
@@ -241,7 +239,6 @@ const CaliforniaChart = (props) => {
               y: event.point.y,
             });
 
-            const dataTypeConfig = getCurrentDataTypeConfig();
             const value = csvData[regionName] || 0;
 
             setHoverInfo({
@@ -348,4 +345,4 @@ const CaliforniaChart = (props) => {
   );
 };
 
-export default CaliforniaChart;
+export default GeorgiaChart;
