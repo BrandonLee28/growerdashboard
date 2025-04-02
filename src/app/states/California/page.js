@@ -23,8 +23,8 @@ const CaliforniaChart = (props) => {
     regionType = "county",
     regionIdProperty = "NAME",
     initialViewCoordinates = {
-      longitude: -1.4179,
-      latitude: 20.7783,
+      longitude: -119.4179,
+      latitude: 37.7783,
       zoom: 6,
     },
     stateBounds = [
