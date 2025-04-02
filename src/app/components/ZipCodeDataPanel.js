@@ -69,7 +69,6 @@ export default function ZipCodeDataPanel({
   const handleDataTypeChange = (newDataType) => {
     onDataTypeChange(newDataType);
   };
-  console.log(csvData);
 
   return (
     <div className="w-80 bg-white rounded-lg shadow-xl overflow-hidden border border-slate-200">

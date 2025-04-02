@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Info } from "lucide-react";
+import getColor from "./getColor";
 
 export default function RegionDataPanel({
   onClose,
@@ -11,6 +12,8 @@ export default function RegionDataPanel({
   csvData,
   dataTypes = [],
   regionType = "county",
+  legendMax,
+  legendMin,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [regionData, setRegionData] = useState([]);
@@ -71,6 +74,21 @@ export default function RegionDataPanel({
   // Get current data type label for title
   const currentDataTypeLabel = getCurrentDataTypeConfig().label;
 
+  // Get color class based on quantity
+  const getColorClass = (quantity) => {
+    const dataTypeConfig = getCurrentDataTypeConfig();
+    const highThreshold = dataTypeConfig.highThreshold || 3000000;
+    const mediumThreshold = dataTypeConfig.mediumThreshold || 100000;
+
+    if (quantity > highThreshold) {
+      return "text-red-600";
+    } else if (quantity > mediumThreshold) {
+      return "text-orange-500";
+    } else {
+      return "text-green-500";
+    }
+  };
+
   return (
     <div className="w-80 bg-white rounded-lg shadow-xl overflow-hidden border border-slate-200">
       <div className="bg-indigo-600 text-white p-3 flex justify-between items-center">
@@ -117,7 +135,6 @@ export default function RegionDataPanel({
           />
         </div>
       </div>
-
       <div className="grid grid-cols-2 bg-indigo-100 p-3 font-medium text-indigo-900">
         <div>{columnLabels.primary}</div>
         <div className="text-right">{columnLabels.secondary}</div>
@@ -125,18 +142,26 @@ export default function RegionDataPanel({
 
       <div className="max-h-80 overflow-y-auto">
         {filteredData.length > 0 ? (
-          filteredData.map((item, index) => (
-            <div
-              key={item.region}
-              className={`grid grid-cols-2 p-3 ${index % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-indigo-50 transition-colors cursor-pointer`}
-              onClick={() => handleRegionSelect(item.region)}
-            >
-              <div className="text-blue-600 font-medium">{item.region}</div>
-              <div className="text-right text-slate-700">
-                {formatValue(item.quantity)}
+          filteredData.map((item, index) => {
+            const color = getColor(item.quantity, legendMin, legendMax);
+            return (
+              <div
+                key={item.region}
+                className={`grid grid-cols-2 p-3 ${
+                  index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                } hover:bg-indigo-50 transition-colors cursor-pointer`}
+                onClick={() => handleRegionSelect(item.region)}
+              >
+                <div className="text-blue-600 font-medium">{item.region}</div>
+                <div
+                  className="text-right font-medium"
+                  style={{ color: color }} // Apply dynamic color
+                >
+                  {formatValue(item.quantity)}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="p-4 text-center text-slate-500">No results found</div>
         )}

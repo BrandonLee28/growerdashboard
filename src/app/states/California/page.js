@@ -8,13 +8,7 @@ import Papa from "papaparse";
 import { Map, Layer, Source, Popup } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapOverlay from "@/app/components/MapOverlay";
-
-const getColor = (value, min, max) => {
-  const ratio = (value - min) / (max - min);
-  const r = Math.round(255 * ratio);
-  const g = Math.round(255 * (1 - ratio));
-  return `rgb(${r},${g},0)`;
-};
+import getColor from "@/app/components/getColor";
 
 const CaliforniaChart = (props) => {
   const {
@@ -35,9 +29,9 @@ const CaliforniaChart = (props) => {
         key: `../california_data/california_county_estab_cleaned.csv`,
         label: "ESTAB",
         valueColumn: "Total ESTAB",
-        description: "Establishments count by region",
+        description: "Total number of establishments by county",
         minValue: 0,
-        maxValue: 200000,
+        maxValue: 1000000,
         formatValue: (value) => value.toLocaleString(),
         unit: "buildings",
       },
@@ -218,6 +212,8 @@ const CaliforniaChart = (props) => {
     }
   };
 
+  const dataTypeConfig = getCurrentDataTypeConfig();
+
   return (
     <div
       className="bg-white"
@@ -291,8 +287,8 @@ const CaliforniaChart = (props) => {
                 "fill-opacity": [
                   "case",
                   ["==", ["get", regionIdProperty], hoveredCounty],
-                  0.8,
-                  0.8,
+                  0.9,
+                  0.9,
                 ],
               }}
             />
@@ -330,6 +326,8 @@ const CaliforniaChart = (props) => {
           csvData={csvData}
           dataTypes={dataTypes}
           regionType={regionType}
+          legendMax={dataTypeConfig.maxValue}
+          legendMin={dataTypeConfig.minValue}
         />
       </Map>
 
