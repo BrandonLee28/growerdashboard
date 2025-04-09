@@ -21,6 +21,8 @@ const MapChart = () => {
     [-65.0, 52.0],
   ];
 
+  const slugify = (name) => name.toLowerCase().replace(/\s+/g, "-");
+
   return (
     <div
       className="bg-white"
@@ -80,7 +82,8 @@ const MapChart = () => {
           console.log(state);
           if (state) {
             setSelectedState(state);
-            router.push(`/states/${state}`);
+
+            router.push(`/states/${slugify(state)}`);
           }
         }}
       >
